@@ -5,7 +5,8 @@ import 'package:chat_gtp_assistent/constants/constants.dart';
 import 'package:http/http.dart' as http;
 
 class OpenAiService {
-  Future<http.Response> request(String propmt, String mode) async {
+  Future<http.Response> request(
+      String propmt, String mode, String apiKey, int maxTokens) async {
     final String apiUrl =
         mode == 'chat' ? 'v1/completions' : 'v1/images/generations';
 
@@ -29,23 +30,6 @@ class OpenAiService {
       },
       body: jsonEncode(body),
     );
-    return response;
-  }
-
-  Future<http.Response> imageGenerator(String propmt) async {
-    final response = await http.post(
-      Uri.parse('${openaiApiUrl}v1/images/generations'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $apiKey'
-      },
-      body: jsonEncode(
-        {
-          "prompt": 'propmt',
-        },
-      ),
-    );
-    log(response.body);
     return response;
   }
 }

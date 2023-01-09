@@ -13,9 +13,11 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.2
+  flutter_secure_storage: ^7.0.1
   http: ^0.13.5
   speech_to_text: ^6.1.1
   text_to_speech: ^0.2.3
+  url_launcher: ^6.1.7
 
 dev_dependencies:
   flutter_test:

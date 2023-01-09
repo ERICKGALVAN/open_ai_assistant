@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
-import 'dart:math';
-import 'dart:ui';
 
 import 'package:chat_gtp_assistent/services/open_ai_service.dart';
+import 'package:chat_gtp_assistent/widgets/invalid_key_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:text_to_speech/text_to_speech.dart';
@@ -28,11 +28,28 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     setState(() {
       _isLoading = true;
     });
-    await OpenAiService().request(propmt, _mode).then(
+    const storage = FlutterSecureStorage();
+
+    final apiKey = await storage.read(key: 'apiKey');
+    if (apiKey == null) {
+      showDialog(
+        context: context,
+        builder: (context) => const InvalidKeyDialog(),
+      );
+      return;
+    }
+    await OpenAiService().request(propmt, _mode, apiKey, 2000).then(
       (value) {
         setState(() {
           _isLoading = false;
         });
+        if (value.statusCode == 401) {
+          showDialog(
+            context: context,
+            builder: (context) => const InvalidKeyDialog(),
+          );
+          return;
+        }
         _textController.clear();
         final res = jsonDecode(value.body);
         if (_mode == 'chat') {
@@ -54,7 +71,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         setState(() {
           _isLoading = false;
         });
-        developer.log(error.toString());
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Something went wrong'),
@@ -70,11 +86,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   void _startListening() async {
-    developer.log('start listening');
     FocusScope.of(context).unfocus();
-    final a = await _speechToText.listen(onResult: _onSpeechResult);
-    developer.log(a.toString());
-    developer.log('end listening');
+    await _speechToText.listen(onResult: _onSpeechResult);
+
     setState(() {});
   }
 
@@ -84,10 +98,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   void _onSpeechResult(SpeechRecognitionResult result) {
-    developer.log('on speech result');
     _audioRecorded = (result.recognizedWords);
-    developer.log(_audioRecorded);
-    developer.log(_speechToText.isListening.toString());
+
     _speechToText.isListening ? null : _sendRequest(_audioRecorded);
   }
 

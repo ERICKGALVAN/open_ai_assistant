@@ -51,5 +51,10 @@
 	<string>Speech recognition is used to allow the user to speak commands to the app.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Microphone is used to allow the user to speak commands to the app.</string>
+	<key>LSApplicationQueriesSchemes</key>
+		<array>
+			<string>sms</string>
+			<string>tel</string>
+		</array>
 </dict>
 </plist>

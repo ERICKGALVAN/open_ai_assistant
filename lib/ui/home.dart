@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 
 import 'package:chat_gtp_assistent/services/open_ai_service.dart';
+import 'package:chat_gtp_assistent/ui/settings.dart';
 import 'package:chat_gtp_assistent/widgets/invalid_key_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:text_to_speech/text_to_speech.dart';
@@ -24,6 +26,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _sendRequest(String propmt) async {
+    final prefs = await SharedPreferences.getInstance();
     _stopListening();
     setState(() {
       _isLoading = true;
@@ -58,6 +61,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 utf8.decode(res['choices'][0]['text'].toString().codeUnits);
           });
           if (_enableAudio) {
+            final language = prefs.getString('language');
+            if (language != null) {
+              _textToSpeech.setLanguage(language);
+            }
             _textToSpeech.speak(response);
           }
         } else {
@@ -121,9 +128,24 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           padding: const EdgeInsets.all(20.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 100),
+              const SizedBox(height: 50),
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Settings(),
+                    ),
+                  );
+                },
+                icon: const Icon(
+                  Icons.settings,
+                  size: 30,
+                ),
+              ),
+              const SizedBox(height: 40),
               Center(
                 child: InkWell(
                   onTap: () {
@@ -153,23 +175,25 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 ),
               ),
               const SizedBox(height: 30),
-              InkWell(
-                onTap: () {
-                  if (!_isLoading) {
-                    setState(() {
-                      _enableAudio = !_enableAudio;
-                    });
-                    _textToSpeech.stop();
-                  }
-                },
-                child: Icon(
-                  _enableAudio ? Icons.mic_outlined : Icons.mic_off,
-                  size: 40,
-                  color: _isLoading
-                      ? const Color.fromARGB(255, 183, 191, 195)
-                      : _enableAudio
-                          ? const Color.fromARGB(255, 33, 40, 243)
-                          : Colors.red,
+              Center(
+                child: InkWell(
+                  onTap: () {
+                    if (!_isLoading) {
+                      setState(() {
+                        _enableAudio = !_enableAudio;
+                      });
+                      _textToSpeech.stop();
+                    }
+                  },
+                  child: Icon(
+                    _enableAudio ? Icons.mic_outlined : Icons.mic_off,
+                    size: 40,
+                    color: _isLoading
+                        ? const Color.fromARGB(255, 183, 191, 195)
+                        : _enableAudio
+                            ? const Color.fromARGB(255, 33, 40, 243)
+                            : Colors.red,
+                  ),
                 ),
               ),
               const SizedBox(

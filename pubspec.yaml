@@ -16,6 +16,7 @@ dependencies:
   flutter_secure_storage: ^7.0.1
   http: ^0.13.5
   speech_to_text: ^6.1.1
+  shared_preferences: ^2.0.16
   text_to_speech: ^0.2.3
   url_launcher: ^6.1.7
 

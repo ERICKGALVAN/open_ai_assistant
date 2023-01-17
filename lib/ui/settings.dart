@@ -87,7 +87,7 @@ class _SettingsState extends State<Settings> {
             ),
             const SizedBox(height: 10),
             DropdownButton<String>(
-              hint: const Text('English'),
+              hint: const Text('Select language'),
               value: _selectedLanguage,
               onChanged: (String? newValue) async {
                 final code = _languageCode[newValue];
